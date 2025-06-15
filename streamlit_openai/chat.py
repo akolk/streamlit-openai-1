@@ -3,7 +3,7 @@ import openai
 import os, json, re, tempfile, zipfile, time
 from pathlib import Path
 from typing import Optional, List, Union, Literal, Dict, Any
-from .utils import CustomFunction
+from .utils import CustomFunction, MCPServer
 from streamlit.runtime.uploaded_file_manager import UploadedFile
 
 DEVELOPER_MESSAGE = """
@@ -58,6 +58,7 @@ class Chat():
         accept_file: Union[bool, Literal["multiple"]] = "multiple",
         uploaded_files: Optional[List[str]] = None,
         functions: Optional[List[CustomFunction]] = None,
+        mcp: Optional(List(MCPServer)] = None,
         user_avatar: Optional[str] = None,
         assistant_avatar: Optional[str] = None,
         placeholder: Optional[str] = "Your message",
@@ -80,6 +81,7 @@ class Chat():
             accept_file (bool or str): Whether the chat input should accept files (True, False, or "multiple") (default: "multiple").
             uploaded_files (list): List of files to be uploaded to the assistant during initialization.
             functions (list): List of custom functions to be attached to the assistant.
+            mcp (list): List of mcp (remote) servers.
             user_avatar (str): An emoji, image URL, or file path that represents the user.
             assistant_avatar (str): An emoji, image URL, or file path that represents the assistant.
             placeholder (str): Placeholder text for the chat input box (default: "Your message").
@@ -98,6 +100,7 @@ class Chat():
         self.accept_file = accept_file
         self.uploaded_files = uploaded_files
         self.functions = functions
+        self.mcp = mcp
         self.user_avatar = user_avatar
         self.assistant_avatar = assistant_avatar
         self.placeholder = placeholder
@@ -134,6 +137,13 @@ class Chat():
                     "parameters": function.parameters,
                 })
 
+        if self.mcp is not None:
+            for _mcp in self.mcp:
+                self._tools.append({
+                    "type": " mcp",
+                    "server_label": _mcp.label,
+                    "server_url": _mcp.url
+                })
         # File search currently allows a maximum of two vector stores
         if allow_file_search and self.vector_store_ids is not None:
             self._tools.append({
