@@ -1,5 +1,24 @@
 from typing import Callable, Dict, Any
 
+class MCPServer():
+    """
+    Represents a custom function that can be invoked by the OpenAI API.
+
+    Attributes:
+        label (str): The label of the MCP Server.
+        url (str): The URL of the remote MCP server.
+    """
+    def __init__(
+            self,
+            label: str,
+            url: str,
+    ) -> None:
+        self.label = label
+        self.url = url
+
+    def __repr__(self) -> str:
+        return f"MCPServer(label='{self.label}')"
+        
 class CustomFunction():
     """
     Represents a custom function that can be invoked by the OpenAI API.
